@@ -30,3 +30,16 @@ async def  on_message(message):
     else:
         await message.channel.send('Access Denied')
         await message.channel.send('Reason : You are not a master')
+async def kick(message):
+  if message.content.startswith('$kick'):
+      if message.author.guild_permissions.kick_members:
+        await message.channel.send(f"You need the following permissions for this\n\033Kick Members")
+        return
+      if message.mentions:
+        member = await message.guild.query_members(user_ids=message.mentions[0].id)
+        await member[0].kick(reason='reason')
+        memb = str(member[0])
+        await message.channel.send(f"`{memb}` has been kicked from the server.")
+      else:
+          await message.channel.send("You must specify a user to kick!")
+          return  
