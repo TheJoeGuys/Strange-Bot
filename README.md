@@ -1,2 +1,2 @@
-# Joe-Bot
+# Strange-Bot
 Yes
