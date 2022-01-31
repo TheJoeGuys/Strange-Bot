@@ -10,6 +10,9 @@ discord = "^1.7.3"
 Flask = "^2.0.1"
 pyjokes = "^0.6.0"
 praw = "^7.5.0"
+utils = "^1.0.1"
+default-values = "^0.5.0"
+randfacts = "^0.15.0"
 
 [tool.poetry.dev-dependencies]
 

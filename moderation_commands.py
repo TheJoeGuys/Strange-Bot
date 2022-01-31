@@ -30,16 +30,25 @@ async def  on_message(message):
     else:
         await message.channel.send('Access Denied')
         await message.channel.send('Reason : You are not a master')
-async def kick(message):
-  if message.content.startswith('$kick'):
-      if message.author.guild_permissions.kick_members:
-        await message.channel.send(f"You need the following permissions for this\n\033Kick Members")
-        return
-      if message.mentions:
-        member = await message.guild.query_members(user_ids=message.mentions[0].id)
-        await member[0].kick(reason='reason')
-        memb = str(member[0])
-        await message.channel.send(f"`{memb}` has been kicked from the server.")
-      else:
-          await message.channel.send("You must specify a user to kick!")
-          return  
+@client.command(ctx)
+async def 8ball(ctx):
+  if message.content.startswith('#8ball'):
+      num = random.randint(1,3)
+      if num == 1:
+        embeddd = discord.Embed(
+        title='',
+		    description=f'Yes.',
+		    color=0xff0000)
+        await message.channel.send(embed=embeddd)
+      if num == 2:
+        embeddd = discord.Embed(
+        title='',
+		    description=f'Nope.',
+		    color=0xff0000)
+        await message.channel.send(embed=embeddd)
+      if num == 3:
+        embeddd = discord.Embed(
+        title='',
+		    description=f'maybe idk 😳',
+		    color=0xff0000)
+        await message.channel.send(embed=embeddd)

@@ -1,12 +1,11 @@
 import os
 import discord
 import random
-import moderation_commands as mod_cmds
-import requests
 import praw
-import json
 import asyncio
-from discord import Color as color
+import pyjokes
+import randfacts
+import json
 from discord.ext import commands
 from keep_alive import keep_alive
 from requests import get 
@@ -18,6 +17,7 @@ banned_words = ['68141', '5403']
 coinsides = ['Heads', 'Tails']
 rate_amount = random.uniform(0.0, 100.0)
 r = random.randint(1, 100)
+joke = pyjokes.get_joke()
 reddit = praw.Reddit(client_id='N0xcvM8my6p3JGDkOJba6w',
                      client_secret=os.getenv('Reddit Token'),
                      user_agent='Richardson_1672', 
@@ -25,6 +25,12 @@ reddit = praw.Reddit(client_id='N0xcvM8my6p3JGDkOJba6w',
 snipe_message_content = None
 snipe_message_author = None
 snipe_message_id = None
+responses = ["As I see it, yes.", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.",
+             "Don’t count on it.", "It is certain.", "It is decidedly so.", "Most likely.", "My reply is no.", "My sources say no.",
+             "Outlook not so good.", "Outlook good.", "Reply hazy, try again.", "Signs point to yes.", "Very doubtful.", "Without a doubt.",
+             "Yes.", "Yes – definitely.", "You may rely on it."]
+post_to_pick = random.randint(1,50)
+colors = [0xFFE4E1, 0x00FF7F, 0xD8BFD8, 0xDC143C, 0xFF4500, 0xDEB887, 0xADFF2F, 0x800000, 0x4682B4, 0x006400, 0x808080, 0xA0522D, 0xF08080, 0xC71585, 0xFFB6C1, 0x00CED1]
 
 @client.event
 async def on_message_delete(message):
@@ -118,16 +124,16 @@ async def on_message(message):
             await message.channel.send('oh piss off')
             await message.delete()
     if message.content.startswith('mping'):
-        if user.id == master_id or user.guild_permissions.administrator:
-            await message.channel.send(message.content[6:len(message.content)])
-            await message.channel.send(message.content[6:len(message.content)])
-            await message.channel.send(message.content[6:len(message.content)])
-            await message.channel.send(message.content[6:len(message.content)])
-            await message.channel.send(message.content[6:len(message.content)])
+      if user.id == master_id or user.guild_permissions.administrator:
+        if message.mentions:
+          await message.channel.send(message.content[6:len(message.content)])
+          await message.channel.send(message.content[6:len(message.content)])
+          await message.channel.send(message.content[6:len(message.content)])
+          await message.channel.send(message.content[6:len(message.content)])
+          await message.channel.send(message.content[6:len(message.content)])
         else:
             await message.channel.send('Access Denied')
-            await message.channel.send(
-                'Reason : You are not a master or an admin')
+            await message.channel.send('Reason : You are not a master or an admin')
 
     if message.content.startswith('iwishtoleavethisserver'):
         if user.guild_permissions.ban_members:
@@ -152,29 +158,29 @@ async def on_message(message):
         await message.delete()
 
     if message.content.startswith('$announce'):
-        if user.guild_permissions.administrator:
+        if user.guild_permissions.administrator or user.id in master_id:
             if message.guild.id == '862039010427142154':
                 channel = client.get_channel(937287363737030696)
                 try:
                     await channel.send(message.content[6:len(message.content)])
-                except:
-                    await message.channel.send("Error")
-        if user.id in master_id:
-            if message.guild.id == '862039010427142154':
-                channel = client.get_channel(937287363737030696)
-                await channel.send(message.content[6:len(message.content)])
+                except Exception as e:
+                    await msg_send(e)
+            else:
+              await msg_send('this is a exclucive command')
         else:
             await message.channel.send("You need Administrator for this")
 
     if msg.startswith('$kick'):
         if user.guild_permissions.kick_members:
             if message.mentions:
-                member = await message.guild.query_members(
-                    user_ids=message.mentions[0].id)
-                await member[0].kick(reason='reason')
-                memb = str(member[0])
-                await message.channel.send(
-                    f"`{memb}` has been kicked from the server.")
+                member = await message.guild.query_members(user_ids=message.mentions[0].id)
+                try:
+                    await member[0].kick(reason=f'By {user}')
+                    memb = str(member[0])
+                    await message.channel.send(
+                        f"`{memb}` has been kick from the server.")
+                except Exception as e:
+                     await msg_send(e)
             else:
                 await message.channel.send("You must specify a user to kick.")
         else:
@@ -185,12 +191,14 @@ async def on_message(message):
     if message.content.startswith('$ban'):
         if user.guild_permissions.ban_members:
             if message.mentions:
-                member = await message.guild.query_members(
-                    user_ids=message.mentions[0].id)
-                await member[0].ban(reason=f'By {user}')
-                memb = str(member[0])
-                await message.channel.send(
-                    f"`{memb}` has been banned from the server.")
+                member = await message.guild.query_members(user_ids=message.mentions[0].id)
+                try:
+                    await member[0].ban(reason=f'By {user}')
+                    memb = str(member[0])
+                    await message.channel.send(
+                        f"`{memb}` has been banned from the server.")
+                except Exception as e:
+                     await msg_send(e)
             else:
                 await message.channel.send("You must specify a user to ban!")
         else:
@@ -207,12 +215,13 @@ async def on_message(message):
 
     if msg.startswith('$avatar'):
         avatar = user.avatar_url
-        embed = discord.Embed(title="Avatar", color=color.Black)
+        random_color = random.choice(colors)
+        embed = discord.Embed(title="Avatar", color=random_color)
         embed.set_image(url=avatar)
-        embed.set_author(name=user.name, url=avatar)
+        embed.set_author(name=user.display_name, url=avatar)
         await msg_send(embed=embed)
     if msg.startswith('!hello'):
-        embed = discord.Embed(title="Title", description="Desc", color=0x00ff00)
+        embed = discord.Embed(title="Title", description="Desc", color=random_color)
         embed.add_field(name="Field1", value="hi", inline=False)
         embed.add_field(name="Field2", value="hi2", inline=False)
         await msg_send(embed=embed)
@@ -233,13 +242,8 @@ async def on_message(message):
         if lim > 99:
             await msg_send("The purge value cannot be greater than 98.", delete_after=5)
 
-    if msg.startswith('$meme'):
-      memes_submissions = reddit.subreddit('memes').hot()
-      post_to_pick = random.randint(1, 10)
-      for i in range(0, post_to_pick):
-          submission = next(x for x in memes_submissions if not x.stickied)
-
-      await msg_send(submission.url)
+    if msg.startswith('$pyjoke'):
+      await msg_send(pyjokes.get_joke())
 
     if msg.startswith('$snipe'): 
       if snipe_message_content==None:
@@ -262,8 +266,52 @@ async def on_message(message):
             emoji = "💖"
         if int(hot) > 75:
             emoji = "💞"
-        await ctx.send(f"**{user.name}** is **{hot:.2f}%** hot {emoji}")
-
-
+        await msg_send(f"**{user.name}** is **{hot:.2f}%** hot {emoji}")
+    
+    if msg.startswith('$nickname'):
+      if  user.guild_permissions.manage_nicknames:
+        name = msg[6:len(message.content)]
+        try:
+            await member.edit(nick=name, reason=f'By {user.name}')
+            message = f"Changed **{member.name}'s** nickname to **{name}**"
+            if name is None:
+                message = f"Reset **{member.name}'s** nickname"
+            await msg_send(message)
+        except Exception as e:
+            await msg_send(e)
+    if msg.endswith('!'):
+      if message.channel.id == 889309445887250443:
+        if msg[-2:-1] == 5:
+          user = member.mention
+          role = discord.utils.get(user.guild.roles, name="Test")
+          await client.add_roles(user, role)
+    if msg.startswith('$joinedat'):
+        embed = discord.Embed(colour=user.top_role.colour.value)
+        embed.description = f'**{user}** joined **{message.guild.name}**\n{(user.joined_at)}'
+        await msg_send(embed=embed)
+    if message.content.startswith('#help'):
+      await asyncio.sleep(0.5)
+      
+      embed = discord.Embed(
+        title='**Joe Bot Commands**',
+		    description=f'\n\n *__$help__* \n\n *__$embed <embed text goes here>__* \n\n *__#say <message goes here>__* \n\n *__#8ball <question>__* \n\n *__#waifu__* \n\n *__#purge <number>__ (number cant be above 98)* \n\n *__#kick <@user>__* \n\n**ENJOY!**',
+		    color=random_color)
+      await message.channel.send(embed=embed)
+    if msg.startswith('$fact'):
+      random_color = random.choice(colors)
+      facts = randfacts.get_fact()
+      embed = discord.Embed(title="Facts", description=facts, color=random_color)
+      embed.set_footer(text=f"Requested By {user}", icon_url=user.avatar_url)
+      await msg_send(embed=embed)
+    if msg.startswith('$8ball'):
+      random_color = random.choice(colors)
+      question = msg[7:len(message.content)]
+      response = random.choice(responses)
+      embed=discord.Embed(title="Magic 8 Ball", color=random_color)
+      embed.add_field(name=':8ball:Question: ', value=f'{question}', inline=True)
+      embed.add_field(name=':8ball:Answer: ', value=f'{response}', inline=False)
+      await msg_send(embed=embed)
+      
+      
 keep_alive()
 client.run(os.getenv('TOKEN'))
